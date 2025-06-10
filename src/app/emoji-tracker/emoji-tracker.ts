@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, signal } from '@angular/core';
 
 interface EmojiCount {
   emoji: string;
@@ -42,6 +42,12 @@ interface Comment {
         }
       </div>
 
+      @if (emojiCounts().length > 0) {
+        <p class="disclaimer">
+          This vote tally reflects the current community feedback on the initial mascot concepts.<br>
+          The results will be used to inform and iterate on further designs before a final mascot is officially chosen.
+        </p>
+      }
       @if (loading()) {
         <div class="loading">
           <div class="spinner"></div>
@@ -204,6 +210,13 @@ interface Comment {
       padding: 15px;
       background: #ffe0e3;
       border-radius: 8px;
+    }
+
+    .disclaimer {
+      margin-top: 30px;
+      text-align: center;
+      color: white;
+      opacity: .7;
     }
 
     @keyframes spin {
