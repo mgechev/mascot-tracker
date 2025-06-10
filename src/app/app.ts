@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmojiTracker } from './emoji-tracker/emoji-tracker';
+import { ThemeToggle } from './theme/theme-toggle';
 
 @Component({
   selector: 'app-root',
-  imports: [EmojiTracker],
+  imports: [EmojiTracker, ThemeToggle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="app-container">
       <div class="stars"></div>
       <div class="twinkling"></div>
+      <header class="app-header">
+        <app-theme-toggle />
+      </header>
       <main>
         <app-emoji-tracker />
       </main>
@@ -17,9 +21,17 @@ import { EmojiTracker } from './emoji-tracker/emoji-tracker';
   styles: [`
     .app-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: var(--bg-secondary);
       position: relative;
       overflow: hidden;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1rem 2rem;
+      position: relative;
+      z-index: 2;
     }
 
     .stars {
@@ -29,8 +41,9 @@ import { EmojiTracker } from './emoji-tracker/emoji-tracker';
       width: 100%;
       height: 100%;
       background: transparent;
-      box-shadow: 0 0 50px #fff;
+      box-shadow: 0 0 50px var(--text-color);
       animation: animateStars 50s linear infinite;
+      opacity: 0.5;
     }
 
     .twinkling {
@@ -41,6 +54,7 @@ import { EmojiTracker } from './emoji-tracker/emoji-tracker';
       height: 100%;
       background: transparent;
       animation: twinkle 1s ease-in-out infinite;
+      opacity: 0.3;
     }
 
     main {

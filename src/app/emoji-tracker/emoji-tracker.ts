@@ -77,25 +77,25 @@ interface Comment {
 
     .header h1 {
       font-size: 2.5em;
-      color: #fff;
+      color: var(--text-color);
       margin-bottom: 10px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
 
     .subtitle {
       font-size: 1.2em;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .subtitle a {
-      color: #ff4757;
+      color: var(--accent-color);
       text-decoration: none;
       font-weight: bold;
       transition: color 0.3s ease;
     }
 
     .subtitle a:hover {
-      color: #ff6b81;
+      color: var(--accent-hover);
       text-decoration: underline;
     }
 
@@ -131,10 +131,10 @@ interface Comment {
     }
 
     .card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 15px;
       padding: 20px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-shadow: var(--card-shadow);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -158,7 +158,7 @@ interface Comment {
       position: absolute;
       top: 20px;
       right: 20px;
-      background: #ff4757;
+      background: var(--accent-color);
       color: white;
       padding: 8px 15px;
       border-radius: 20px;
@@ -170,7 +170,7 @@ interface Comment {
     .progress-bar {
       width: 100%;
       height: 10px;
-      background: #f1f2f6;
+      background: var(--progress-bg);
       border-radius: 5px;
       margin: 15px 0;
       overflow: hidden;
@@ -178,7 +178,7 @@ interface Comment {
 
     .progress {
       height: 100%;
-      background: linear-gradient(90deg, #ff4757, #ff6b81);
+      background: var(--progress-fill);
       border-radius: 5px;
       transition: width 1s ease-in-out;
     }
@@ -186,20 +186,20 @@ interface Comment {
     .percentage {
       font-size: 1.2em;
       font-weight: bold;
-      color: #2f3542;
+      color: var(--text-color);
     }
 
     .loading {
       text-align: center;
       margin-top: 40px;
-      color: #fff;
+      color: var(--text-color);
     }
 
     .spinner {
       width: 50px;
       height: 50px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid #ff4757;
+      border: 5px solid var(--spinner-border);
+      border-top: 5px solid var(--spinner-border-top);
       border-radius: 50%;
       margin: 0 auto 20px;
       animation: spin 1s linear infinite;
@@ -208,16 +208,16 @@ interface Comment {
     .error {
       text-align: center;
       margin-top: 20px;
-      color: #ff4757;
+      color: var(--accent-color);
       padding: 15px;
-      background: #ffe0e3;
+      background: rgba(255, 71, 87, 0.1);
       border-radius: 8px;
     }
 
     .disclaimer {
       margin-top: 30px;
       text-align: center;
-      color: white;
+      color: var(--text-color);
       opacity: .7;
     }
 
@@ -279,7 +279,8 @@ export class EmojiTracker implements OnInit {
 
     const fetchPage = (page: number): Promise<void> => {
       return new Promise((resolve, reject) => {
-        this.http.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`).subscribe({
+        this.http.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`)
+        .subscribe({
           next: (comments) => {
             if (comments.length === 0) {
               resolve();
