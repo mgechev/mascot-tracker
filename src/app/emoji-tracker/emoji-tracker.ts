@@ -184,6 +184,7 @@ interface Comment {
     .loading {
       text-align: center;
       margin-top: 40px;
+      color: #fff;
     }
 
     .spinner {
@@ -254,9 +255,9 @@ export class EmojiTracker implements OnInit {
     const counts = new Map<string, number>();
     const userVotes = new Map<string, string>(); // Map of username to their vote
     const emojiToImage = {
-      '1️⃣': '/1.webp',
-      '2️⃣': '/2.webp',
-      '3️⃣': '/3.webp'
+      '1️⃣': './1.webp',
+      '2️⃣': './2.webp',
+      '3️⃣': './3.webp'
     };
     
     ['1️⃣', '2️⃣', '3️⃣'].forEach(emoji => counts.set(emoji, 0));
