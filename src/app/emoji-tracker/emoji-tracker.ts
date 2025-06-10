@@ -22,7 +22,7 @@ interface Comment {
   template: `
     <div class="emoji-tracker">
       <div class="header">
-        <h1>🏆 Angular RFC Tracker 🏆</h1>
+        <h1>🏆 Angular Mascot RFC Tracker 🏆</h1>
         <p class="subtitle">Vote for your <a href="https://github.com/angular/angular/discussions/61733">favorite mascot</a> design!</p>
       </div>
       
