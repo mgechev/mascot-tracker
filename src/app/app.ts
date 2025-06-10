@@ -1,18 +1,16 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { EmojiTracker } from './emoji-tracker/emoji-tracker';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, HttpClientModule, EmojiTracker],
+  imports: [EmojiTracker],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="app-container">
       <div class="stars"></div>
       <div class="twinkling"></div>
       <main>
-        <app-emoji-tracker></app-emoji-tracker>
+        <app-emoji-tracker />
       </main>
     </div>
   `,
