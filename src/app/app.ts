@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { EmojiTracker } from './emoji-tracker/emoji-tracker';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, EmojiTracker],
+  imports: [CommonModule, HttpClientModule, EmojiTracker],
   template: `
     <div class="app-container">
       <div class="stars"></div>

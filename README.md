@@ -1,59 +1,70 @@
-# MascotTracker
+# Angular Mascot Tracker 🏆
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.0-rc.0.
+A real-time tracker for the Angular mascot design RFC, displaying vote counts and statistics from the [Angular mascot discussion](https://github.com/angular/angular/discussions/61733).
 
-## Development server
+## Features
 
-To start a local development server, run:
+- 📊 Real-time tracking of mascot design votes
+- 👤 Unique vote counting (one vote per GitHub user)
 
+## Live Demo
+
+Visit the live application at [https://mgechev.github.io/mascot-tracker](https://mgechev.github.io/mascot-tracker).
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm (v9 or later)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/mgechev/mascot-tracker.git
+cd mascot-tracker
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+4. Open your browser and navigate to `http://localhost:4200`
 
-## Code scaffolding
+## How It Works
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+The application fetches comments from the Angular mascot discussion on GitHub and analyzes them to:
 
-```bash
-ng generate component component-name
-```
+1. Count unique votes for each mascot design (1️⃣, 2️⃣, 3️⃣)
+2. Track one vote per GitHub user
+3. Calculate vote percentages
+4. Display real-time statistics with a beautiful UI
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Development
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Building for Production
 
 ```bash
-ng test
+npm run deploy
 ```
 
-## Running end-to-end tests
+The build artifacts will be stored in the `dist/` directory.
 
-For end-to-end (e2e) testing, run:
+## Contributing
 
-```bash
-ng e2e
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## License
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT
