@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 
 interface EmojiCount {
   emoji: string;
@@ -17,21 +17,23 @@ interface Comment {
 
 @Component({
   selector: 'app-emoji-tracker',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [NgOptimizedImage],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="emoji-tracker">
       <div class="header">
         <h1>🏆 Angular Mascot RFC Tracker 🏆</h1>
         <p class="subtitle">Vote for your <a href="https://github.com/angular/angular/discussions/61733">favorite mascot</a> design!</p>
       </div>
-      
+
       <div class="emoji-counts">
         @for (count of emojiCounts(); track count.emoji) {
           <div class="emoji-count" [class.winner]="isWinner(count)">
-            <div class="trophy" *ngIf="isWinner(count)">👑</div>
+            @if(isWinner(count)) {
+              <div class="trophy">👑</div>
+            }
             <div class="card">
-              <img [src]="count.image" [alt]="count.emoji" class="emoji-image">
+              <img [ngSrc]="count.image" [alt]="count.emoji" class="emoji-image" height="200" width="200">
               <div class="count-badge">{{ count.count }}</div>
               <div class="progress-bar">
                 <div class="progress" [style.width.%]="getPercentage(count)"></div>
@@ -48,8 +50,8 @@ interface Comment {
           <p>Counting unique votes...</p>
         </div>
       }
-      @if (error) {
-        <div class="error">{{ error }}</div>
+      @if (error()) {
+        <div class="error">{{ error() }}</div>
       }
     </div>
   `,
@@ -232,7 +234,7 @@ interface Comment {
 export class EmojiTracker implements OnInit {
   emojiCounts = signal<EmojiCount[]>([]);
   loading = signal(true);
-  error: string | null = null;
+  error = signal<string | null>(null);
 
   constructor(private http: HttpClient) {}
 
@@ -259,9 +261,9 @@ export class EmojiTracker implements OnInit {
       '2️⃣': './2.webp',
       '3️⃣': './3.webp'
     };
-    
+
     ['1️⃣', '2️⃣', '3️⃣'].forEach(emoji => counts.set(emoji, 0));
-    
+
     const fetchPage = (page: number): Promise<void> => {
       return new Promise((resolve, reject) => {
         this.http.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`).subscribe({
@@ -270,11 +272,11 @@ export class EmojiTracker implements OnInit {
               resolve();
               return;
             }
-            
+
             comments.forEach(comment => {
               const username = comment.user.login;
               const body = comment.body;
-              
+
               // Check if user has already voted
               if (userVotes.has(username)) {
                 return; // Skip if user already voted
@@ -287,7 +289,7 @@ export class EmojiTracker implements OnInit {
                 counts.set(emoji, (counts.get(emoji) || 0) + 1);
               }
             });
-            
+
             // Fetch next page
             fetchPage(page + 1).then(resolve).catch(reject);
           },
@@ -304,9 +306,9 @@ export class EmojiTracker implements OnInit {
       })));
       this.loading.set(false);
     }).catch((err) => {
-      this.error = 'Failed to fetch emoji counts. Please try again later.';
+      this.error.set('Failed to fetch emoji counts. Please try again later.');
       this.loading.set(false);
       console.error('Error fetching emoji counts:', err);
     });
   }
-} 
+}
