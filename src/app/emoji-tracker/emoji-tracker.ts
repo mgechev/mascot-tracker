@@ -1,25 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { NgOptimizedImage } from '@angular/common';
-
-interface EmojiCount {
-  emoji: string;
-  count: number;
-  image: string;
-}
-
-interface Comment {
-  body: string;
-  user: {
-    login: string;
-  };
-}
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { EmojiTrackerService } from './emoji-tracker-service';
 
 @Component({
   selector: 'app-emoji-tracker',
   imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @let emojiCounts = emojiCountsResource.value();
+    @let isLoading = emojiCountsResource.isLoading();
+    @let error = emojiCountsResource.error();
+
     <div class="emoji-tracker">
       <div class="header">
         <h1>🏆 Angular Mascot RFC Tracker 🏆</h1>
@@ -29,37 +20,37 @@ interface Comment {
       </div>
 
       <div class="emoji-counts">
-        @for (count of emojiCounts(); track count.emoji) {
-          <div class="emoji-count" [class.winner]="isWinner(count)">
-            @if (isWinner(count)) {
+        @for (emoji of emojiCounts; track emoji.emoji) {
+          <div class="emoji-count" [class.winner]="emoji.isWinner">
+            @if (emoji.isWinner) {
               <div class="trophy">👑</div>
             }
             <div class="card">
-              <img [ngSrc]="count.image" [alt]="count.emoji" class="emoji-image" height="200" width="200" />
-              <div class="count-badge">{{ count.count }}</div>
+              <img [ngSrc]="emoji.image" [alt]="emoji.emoji" class="emoji-image" height="200" width="200" />
+              <div class="count-badge">{{ emoji.count }}</div>
               <div class="progress-bar">
-                <div class="progress" [style.width.%]="getPercentage(count)"></div>
+                <div class="progress" [style.width.%]="emoji.percentage"></div>
               </div>
-              <div class="percentage">{{ getPercentage(count) }}%</div>
+              <div class="percentage">{{ emoji.percentage }}%</div>
             </div>
           </div>
         }
       </div>
 
-      @if (emojiCounts().length > 0) {
+      @if (emojiCounts.length > 0) {
         <p class="disclaimer">
           This vote tally reflects the current community feedback on the initial mascot concepts.<br />
           The results will be used to inform and iterate on further designs before a final mascot is officially chosen.
         </p>
       }
-      @if (loading()) {
+      @if (isLoading) {
         <div class="loading">
           <div class="spinner"></div>
           <p>Counting unique votes...</p>
         </div>
       }
-      @if (error()) {
-        <div class="error">{{ error() }}</div>
+      @if (error) {
+        <div class="error">{{ error }}</div>
       }
     </div>
   `,
@@ -270,89 +261,8 @@ interface Comment {
     `,
   ],
 })
-export class EmojiTracker implements OnInit {
-  private readonly httpClient = inject(HttpClient);
-  emojiCounts = signal<EmojiCount[]>([]);
-  loading = signal(true);
-  error = signal<string | null>(null);
+export class EmojiTracker {
+  private readonly emojiTrackerService = inject(EmojiTrackerService);
 
-  ngOnInit() {
-    this.fetchEmojiCounts();
-  }
-
-  isWinner(count: EmojiCount): boolean {
-    const maxCount = Math.max(...this.emojiCounts().map(c => c.count));
-    return count.count === maxCount && count.count > 0;
-  }
-
-  getPercentage(count: EmojiCount): number {
-    const total = this.emojiCounts().reduce((sum, c) => sum + c.count, 0);
-    return total > 0 ? Math.round((count.count / total) * 100) : 0;
-  }
-
-  private fetchEmojiCounts() {
-    const baseUrl = 'https://api.github.com/repos/angular/angular/discussions/61733/comments';
-    const counts = new Map<string, number>();
-    const userVotes = new Map<string, string>(); // Map of username to their vote
-    const emojiToImage = {
-      '1️⃣': './1.webp',
-      '2️⃣': './2.webp',
-      '3️⃣': './3.webp',
-    };
-
-    ['1️⃣', '2️⃣', '3️⃣'].forEach(emoji => counts.set(emoji, 0));
-
-    const fetchPage = (page: number): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        this.httpClient.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`).subscribe({
-          next: comments => {
-            if (comments.length === 0) {
-              resolve();
-              return;
-            }
-
-            comments.forEach(comment => {
-              const username = comment.user.login;
-              const body = comment.body;
-
-              // Check if user has already voted
-              if (userVotes.has(username)) {
-                return; // Skip if user already voted
-              }
-
-              // Find the first emoji in the comment
-              const emoji = ['1️⃣', '2️⃣', '3️⃣'].find(e => body.includes(e));
-              if (emoji) {
-                userVotes.set(username, emoji);
-                counts.set(emoji, (counts.get(emoji) || 0) + 1);
-              }
-            });
-
-            // Fetch next page
-            fetchPage(page + 1)
-              .then(resolve)
-              .catch(reject);
-          },
-          error: reject,
-        });
-      });
-    };
-
-    fetchPage(1)
-      .then(() => {
-        this.emojiCounts.set(
-          Array.from(counts.entries()).map(([emoji, count]) => ({
-            emoji,
-            count,
-            image: emojiToImage[emoji as keyof typeof emojiToImage],
-          }))
-        );
-        this.loading.set(false);
-      })
-      .catch(err => {
-        this.error.set('Failed to fetch emoji counts. Please try again later.');
-        this.loading.set(false);
-        console.error('Error fetching emoji counts:', err);
-      });
-  }
+  emojiCountsResource = this.emojiTrackerService.getEmojiTrackerResource();
 }
