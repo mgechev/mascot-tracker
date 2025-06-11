@@ -1,23 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgOptimizedImage } from '@angular/common';
-
-interface EmojiCount {
-  emoji: string;
-  count: number;
-  image: string;
-}
-
-interface Comment {
-  body: string;
-  user: {
-    login: string;
-  };
-}
+import { EmojiCard } from '../emoji-card/emoji-card';
+import { EmojiCount } from '../models/emoji-count.model';
+import { Comment } from '../models/comment.model';
 
 @Component({
   selector: 'app-emoji-tracker',
-  imports: [NgOptimizedImage],
+  imports: [EmojiCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="emoji-tracker">
@@ -26,23 +15,43 @@ interface Comment {
         <p class="subtitle">Vote for your <a href="https://github.com/angular/angular/discussions/61733">favorite mascot</a> design!</p>
       </div>
 
-      <div class="emoji-counts">
-        @for (count of emojiCounts(); track count.emoji) {
-          <div class="emoji-count" [class.winner]="isWinner(count)">
-            @if(isWinner(count)) {
-              <div class="trophy">👑</div>
-            }
-            <div class="card">
-              <img [ngSrc]="count.image" [alt]="count.emoji" class="emoji-image" height="200" width="200">
-              <div class="count-badge">{{ count.count }}</div>
-              <div class="progress-bar">
-                <div class="progress" [style.width.%]="getPercentage(count)"></div>
-              </div>
-              <div class="percentage">{{ getPercentage(count) }}%</div>
-            </div>
+      <!-- Podium for top three emojis -->
+      @if (emojiCounts().length >= 3) {
+        <div class="podium-container">
+          <!-- Second place (left) -->
+          <div class="podium-item podium-second">
+            <div class="trophy">🥈</div>
+            <app-emoji-card
+              [emojiData]="topThreeEmojis()[1]"
+              [percentage]="getPercentage(topThreeEmojis()[1])"
+              [size]="180"
+              podiumPosition="second">
+            </app-emoji-card>
           </div>
-        }
-      </div>
+
+          <!-- First place (middle) -->
+          <div class="podium-item podium-first">
+            <div class="trophy">👑</div>
+            <app-emoji-card
+              [emojiData]="topThreeEmojis()[0]"
+              [percentage]="getPercentage(topThreeEmojis()[0])"
+              [size]="220"
+              podiumPosition="first">
+            </app-emoji-card>
+          </div>
+
+          <!-- Third place (right) -->
+          <div class="podium-item podium-third">
+            <div class="trophy">🥉</div>
+            <app-emoji-card
+              [emojiData]="topThreeEmojis()[2]"
+              [percentage]="getPercentage(topThreeEmojis()[2])"
+              [size]="160"
+              podiumPosition="third">
+            </app-emoji-card>
+          </div>
+        </div>
+      }
 
       @if (emojiCounts().length > 0) {
         <p class="disclaimer">
@@ -99,25 +108,63 @@ interface Comment {
       text-decoration: underline;
     }
 
-    .emoji-counts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
+    /* Podium styles */
+    .podium-container {
+      display: flex;
       justify-content: center;
-      margin-top: 20px;
+      align-items: flex-end;
+      margin: 60px auto;
+      max-width: 900px;
+      position: relative;
     }
 
-    .emoji-count {
+    .podium-item {
       position: relative;
       transition: transform 0.3s ease;
+      margin: 0 15px;
     }
 
-    .emoji-count:hover {
-      transform: translateY(-5px);
+    .podium-item:hover {
+      transform: scale(1.05);
     }
 
-    .emoji-count.winner {
-      animation: winnerPulse 2s infinite;
+    .podium-first {
+      order: 2;
+      z-index: 3;
+      transform: translateY(-20px);
+    }
+
+    .podium-first:hover {
+      transform: scale(1.05) translateY(-20px);
+    }
+
+    /* Card styles moved to emoji-card component */
+
+    .podium-second {
+      order: 1;
+      z-index: 2;
+    }
+
+    /* Card styles moved to emoji-card component */
+
+    .podium-third {
+      order: 3;
+      z-index: 1;
+    }
+
+    /* Card styles moved to emoji-card component */
+
+    .podium-item .trophy {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      z-index: 1;
+    }
+
+    .podium-first .trophy {
+      font-size: 2.5em;
     }
 
     .trophy {
@@ -127,67 +174,9 @@ interface Comment {
       transform: translateX(-50%);
       font-size: 2em;
       z-index: 1;
-      animation: float 3s ease-in-out infinite;
     }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .emoji-image {
-      width: 200px;
-      height: 200px;
-      object-fit: contain;
-      margin-bottom: 15px;
-      transition: transform 0.3s ease;
-    }
-
-    .emoji-count:hover .emoji-image {
-      transform: scale(1.05);
-    }
-
-    .count-badge {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--accent-color);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 1.2em;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: var(--progress-bg);
-      border-radius: 5px;
-      margin: 15px 0;
-      overflow: hidden;
-    }
-
-    .progress {
-      height: 100%;
-      background: var(--progress-fill);
-      border-radius: 5px;
-      transition: width 1s ease-in-out;
-    }
-
-    .percentage {
-      font-size: 1.2em;
-      font-weight: bold;
-      color: var(--text-color);
-    }
+    /* Card styles moved to emoji-card component */
 
     .loading {
       text-align: center;
@@ -231,17 +220,6 @@ interface Comment {
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes winnerPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes float {
-      0% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-10px); }
-      100% { transform: translateX(-50%) translateY(0); }
-    }
   `]
 })
 export class EmojiTracker implements OnInit {
@@ -249,15 +227,15 @@ export class EmojiTracker implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  constructor(private http: HttpClient) {}
+  // Get top three emojis sorted by count as a computed signal
+  topThreeEmojis = computed(() => {
+    return [...this.emojiCounts()].sort((a, b) => b.count - a.count).slice(0, 3);
+  });
+
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
     this.fetchEmojiCounts();
-  }
-
-  isWinner(count: EmojiCount): boolean {
-    const maxCount = Math.max(...this.emojiCounts().map(c => c.count));
-    return count.count === maxCount && count.count > 0;
   }
 
   getPercentage(count: EmojiCount): number {
@@ -280,35 +258,35 @@ export class EmojiTracker implements OnInit {
     const fetchPage = (page: number): Promise<void> => {
       return new Promise((resolve, reject) => {
         this.http.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`)
-        .subscribe({
-          next: (comments) => {
-            if (comments.length === 0) {
-              resolve();
-              return;
-            }
-
-            comments.forEach(comment => {
-              const username = comment.user.login;
-              const body = comment.body;
-
-              // Check if user has already voted
-              if (userVotes.has(username)) {
-                return; // Skip if user already voted
+          .subscribe({
+            next: (comments) => {
+              if (comments.length === 0) {
+                resolve();
+                return;
               }
 
-              // Find the first emoji in the comment
-              const emoji = ['1️⃣', '2️⃣', '3️⃣'].find(e => body.includes(e));
-              if (emoji) {
-                userVotes.set(username, emoji);
-                counts.set(emoji, (counts.get(emoji) || 0) + 1);
-              }
-            });
+              comments.forEach(comment => {
+                const username = comment.user.login;
+                const body = comment.body;
 
-            // Fetch next page
-            fetchPage(page + 1).then(resolve).catch(reject);
-          },
-          error: reject
-        });
+                // Check if user has already voted
+                if (userVotes.has(username)) {
+                  return; // Skip if user already voted
+                }
+
+                // Find the first emoji in the comment
+                const emoji = ['1️⃣', '2️⃣', '3️⃣'].find(e => body.includes(e));
+                if (emoji) {
+                  userVotes.set(username, emoji);
+                  counts.set(emoji, (counts.get(emoji) || 0) + 1);
+                }
+              });
+
+              // Fetch next page
+              fetchPage(page + 1).then(resolve).catch(reject);
+            },
+            error: reject
+          });
       });
     };
 
