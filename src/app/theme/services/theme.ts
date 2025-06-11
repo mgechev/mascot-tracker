@@ -1,8 +1,8 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
 export const enum ThemeMode {
   LIGHT = 'light',
-  DARK = 'dark'
+  DARK = 'dark',
 }
 
 const THEME_KEY = 'ng-mascot-theme';
@@ -19,7 +19,7 @@ export class Theme {
   });
 
   toggleTheme(): void {
-    this.themeSignal.update(current => current === ThemeMode.LIGHT ? ThemeMode.DARK : ThemeMode.LIGHT);
+    this.themeSignal.update(current => (current === ThemeMode.LIGHT ? ThemeMode.DARK : ThemeMode.LIGHT));
   }
 
   private getInitialTheme(): ThemeMode {
