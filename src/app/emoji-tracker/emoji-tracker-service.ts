@@ -1,5 +1,5 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, expand, filter, map, of, takeLast, throwError } from 'rxjs';
 
@@ -26,16 +26,16 @@ export class EmojiTrackerService {
     return rxResource({
       params: undefined,
       stream: () =>
-        of({ comments: [] as Comment[] | null, page: 1 }).pipe(
+        of({ comments: [] as Comment[], page: 1 }).pipe(
           expand(({ page, comments }) => {
-            if (comments === null) {
+            if (comments.length === 0 && page !== 1) {
               return EMPTY;
             }
             return this.httpClient
               .get<Comment[]>(`https://api.github.com/repos/angular/angular/discussions/61733/comments?page=${page}&per_page=100`)
               .pipe(
                 map(response => ({
-                  comments: response.length === 0 ? null : response,
+                  comments: response,
                   page: page + 1,
                 })),
                 catchError(error => {
