@@ -3,9 +3,5 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideZonelessChangeDetection(),
-    provideHttpClient()
-  ]
+  providers: [provideBrowserGlobalErrorListeners(), provideZonelessChangeDetection(), provideHttpClient()],
 };
