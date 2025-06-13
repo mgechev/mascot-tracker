@@ -1,15 +1,15 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {NgClass, NgOptimizedImage} from '@angular/common';
+import {NgOptimizedImage} from '@angular/common';
 import {EmojiCount} from '../models/emoji-count.model';
 
 type PodiumPosition = 'first' | 'second' | 'third';
 
 @Component({
   selector: 'app-emoji-card',
-  imports: [NgOptimizedImage, NgClass],
+  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="card" [ngClass]="podiumClass()">
+    <div class="card" [class]="podiumClass()">
       <img [ngSrc]="emojiData().image" [alt]="emojiData().emoji" class="emoji-image" [height]="size()" [width]="size()">
       <div class="count-badge">{{ emojiData().count }}</div>
       <div class="progress-bar">
