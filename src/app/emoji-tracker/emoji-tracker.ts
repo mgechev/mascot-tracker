@@ -12,7 +12,9 @@ import { Comment } from '../models/comment.model';
     <div class="emoji-tracker">
       <div class="header">
         <h1>🏆 Angular Mascot RFC Tracker 🏆</h1>
-        <p class="subtitle">Vote for your <a href="https://github.com/angular/angular/discussions/61733">favorite mascot</a> design!</p>
+        <p class="subtitle">
+          Vote for your <a href="https://github.com/angular/angular/discussions/61733">favorite mascot</a> design!
+        </p>
       </div>
 
       <!-- Podium for top three emojis -->
@@ -55,7 +57,7 @@ import { Comment } from '../models/comment.model';
 
       @if (emojiCounts().length > 0) {
         <p class="disclaimer">
-          This vote tally reflects the current community feedback on the initial mascot concepts.<br>
+          This vote tally reflects the current community feedback on the initial mascot concepts.<br />
           The results will be used to inform and iterate on further designs before a final mascot is officially chosen.
         </p>
       }
@@ -70,6 +72,7 @@ import { Comment } from '../models/comment.model';
       }
     </div>
   `,
+
   styles: [`
     .emoji-tracker {
       padding: 20px;
@@ -223,6 +226,7 @@ import { Comment } from '../models/comment.model';
   `]
 })
 export class EmojiTracker implements OnInit {
+  private readonly httpClient = inject(HttpClient);
   emojiCounts = signal<EmojiCount[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -250,13 +254,14 @@ export class EmojiTracker implements OnInit {
     const emojiToImage = {
       '1️⃣': './1.webp',
       '2️⃣': './2.webp',
-      '3️⃣': './3.webp'
+      '3️⃣': './3.webp',
     };
 
     ['1️⃣', '2️⃣', '3️⃣'].forEach(emoji => counts.set(emoji, 0));
 
     const fetchPage = (page: number): Promise<void> => {
       return new Promise((resolve, reject) => {
+
         this.http.get<Comment[]>(`${baseUrl}?page=${page}&per_page=100`)
           .subscribe({
             next: (comments) => {
@@ -290,17 +295,21 @@ export class EmojiTracker implements OnInit {
       });
     };
 
-    fetchPage(1).then(() => {
-      this.emojiCounts.set(Array.from(counts.entries()).map(([emoji, count]) => ({
-        emoji,
-        count,
-        image: emojiToImage[emoji as keyof typeof emojiToImage]
-      })));
-      this.loading.set(false);
-    }).catch((err) => {
-      this.error.set('Failed to fetch emoji counts. Please try again later.');
-      this.loading.set(false);
-      console.error('Error fetching emoji counts:', err);
-    });
+    fetchPage(1)
+      .then(() => {
+        this.emojiCounts.set(
+          Array.from(counts.entries()).map(([emoji, count]) => ({
+            emoji,
+            count,
+            image: emojiToImage[emoji as keyof typeof emojiToImage],
+          }))
+        );
+        this.loading.set(false);
+      })
+      .catch(err => {
+        this.error.set('Failed to fetch emoji counts. Please try again later.');
+        this.loading.set(false);
+        console.error('Error fetching emoji counts:', err);
+      });
   }
 }
