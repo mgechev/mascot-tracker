@@ -226,7 +226,6 @@ import { Comment } from '../models/comment.model';
   `]
 })
 export class EmojiTracker implements OnInit {
-  private readonly httpClient = inject(HttpClient);
   emojiCounts = signal<EmojiCount[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
